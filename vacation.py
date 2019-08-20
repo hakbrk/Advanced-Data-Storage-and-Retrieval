@@ -8,9 +8,21 @@ import datetime as dt
 from datetime import date
 from flask import Flask, jsonify
 import numpy as np
+# engine = create_engine("sqlite:///titanic.sqlite")
+
+# # reflect an existing database into a new model
+# Base = automap_base()
+# # reflect the tables
+# Base.prepare(engine, reflect=True)
+
+# # Save reference to the table
+# Passenger = Base.classes.passenger
+
+
+
 
 # Database Setup
-engine = create_engine('sqlite:///Resources/hawaii.sqlite')
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # Reflect database into new model
 Base = automap_base()
@@ -36,8 +48,8 @@ def index():
         f"/api/v1.0/Precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/start<br/>"
-        f"/api/v1.0/start-end<br/>"
+        f"/api/v1.0/start/start date (Ex. 2015-01-30)<br/>"
+        f"/api/v1.0/start-end/start date/end date (Ex. 2015-01-30)<br/>"
     )
 
 @app.route("/api/v1.0/Precipitation")
@@ -109,9 +121,9 @@ def temperature():
 
     return jsonify(temp_one_year)
 
-@app.route("/api/v1.0/start")
-def temp_data():
-    start_date = "2012-02-28"
+
+@app.route("/api/v1.0/start/<start_date>")
+def temp_data(start_date):
     session = Session(engine)
     temp_min = session.query(func.min(Measurement.tobs)).filter(Measurement.date >= start_date).all()
     temp_avg = session.query(func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).all()
@@ -126,10 +138,8 @@ def temp_data():
         f"The average recorded temperaure is {np.ravel(temp_avg[0][0])[0].astype(float).round(1)}\u00B0F<br/>"
         f"The maximum temperaure recorded is {temp_max[0][0]}\u00B0F<br/>")
 
-@app.route("/api/v1.0/start-end")
-def temp_data_multi():
-    start_date = "2016-11-24"
-    end_date = "2016-11-30"
+@app.route("/api/v1.0/start-end/<start_date>/<end_date>")
+def temp_data_end(start_date, end_date):
     session = Session(engine)
     temp_min = session.query(func.min(Measurement.tobs)).filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
     temp_avg = session.query(func.avg(Measurement.tobs)).filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
